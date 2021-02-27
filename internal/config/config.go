@@ -43,7 +43,7 @@ func InitConfig() {
 	KintoDomain = utilsGoConfig.GetStringOrDie("KINTO_DOMAIN")
 	BuildApiHost = utilsGoConfig.GetString("BUILD_API_HOST", "kinto-builder:8080")
 
-	SSLEnabled = utilsGoConfig.GetBool("ENABLE_SSL", false)
+	SSLEnabled = utilsGoConfig.GetBool("SSL_ENABLED", false)
 	if SSLEnabled {
 		CertManagerIssuerEmail = utilsGoConfig.GetStringOrDie("CERT_MANAGER_ISSUER_EMAIL")
 		CertManagerIssuerServer = utilsGoConfig.GetString("CERT_MANAGER_ISSUER_SERVER", "https://acme-staging-v02.api.letsencrypt.org/directory")
