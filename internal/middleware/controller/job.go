@@ -7,8 +7,8 @@ import (
 )
 
 func (c *ControllerMiddleware) WatchJobsStatus(
-	blockName, envId string,
 	ctx context.Context,
+	blockName, envId string,
 	sendClientLogs func(jobStatus *types.JobStatus) error) *utilsGoServer.Error {
 	return c.store.WatchJobsStatus(blockName, envId, ctx, sendClientLogs)
 }

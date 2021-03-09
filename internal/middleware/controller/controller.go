@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"github.com/kintoproj/kinto-core/internal/build"
 	"github.com/kintoproj/kinto-core/internal/middleware"
 	"github.com/kintoproj/kinto-core/internal/store"
@@ -14,7 +15,7 @@ type ControllerMiddleware struct {
 	build build.BuildInterface
 }
 
-func NewController(
+func NewControllerMiddleware(
 	kubeStore store.StoreInterface, buildClient build.BuildInterface) middleware.Interface {
 
 	return &ControllerMiddleware{
@@ -23,7 +24,7 @@ func NewController(
 	}
 }
 
-func (ControllerMiddleware) GetKintoConfiguration() (*types.KintoConfiguration, error) {
+func (ControllerMiddleware) GetKintoConfiguration(ctx context.Context) (*types.KintoConfiguration, error) {
 	return &types.KintoConfiguration{
 		Languages:          types.LanguagesOptions,
 		MemoryOptions:      types.MemoryOpts,

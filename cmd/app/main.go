@@ -6,6 +6,7 @@ import (
 	"github.com/kintoproj/kinto-core/internal/build/api"
 	"github.com/kintoproj/kinto-core/internal/config"
 	"github.com/kintoproj/kinto-core/internal/middleware"
+	"github.com/kintoproj/kinto-core/internal/middleware/auth"
 	"github.com/kintoproj/kinto-core/internal/middleware/controller"
 	"github.com/kintoproj/kinto-core/internal/server"
 	"github.com/kintoproj/kinto-core/internal/store/kube"
@@ -24,7 +25,8 @@ func main() {
 			utilsGrpc.CreateConnectionOrDie(config.BuildApiHost, false)))
 
 	middlewares := []middleware.Interface{
-		controller.NewController(store, buildClient),
+		auth.NewAuthMiddleware(config.KintoCoreSecret),
+		controller.NewControllerMiddleware(store, buildClient),
 	}
 
 	coreService := server.NewKintoCoreService(middleware.NewControllerMiddlewareOrDie(middlewares...))

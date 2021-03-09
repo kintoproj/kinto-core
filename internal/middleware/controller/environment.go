@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"github.com/kintohub/utils-go/klog"
 	utilsGoServer "github.com/kintohub/utils-go/server"
 	"github.com/kintoproj/kinto-core/internal/store"
@@ -8,7 +9,7 @@ import (
 	"github.com/kintoproj/kinto-core/pkg/types"
 )
 
-func (c *ControllerMiddleware) GetEnvironment(id string) (*types.Environment, *utilsGoServer.Error) {
+func (c *ControllerMiddleware) GetEnvironment(ctx context.Context, id string) (*types.Environment, *utilsGoServer.Error) {
 	env, err := c.store.GetEnvironment(id)
 
 	if err != nil {
@@ -23,16 +24,16 @@ func (c *ControllerMiddleware) GetEnvironment(id string) (*types.Environment, *u
 	return env, err
 }
 
-func (c *ControllerMiddleware) GetEnvironments() (*types.Environments, *utilsGoServer.Error) {
+func (c *ControllerMiddleware) GetEnvironments(ctx context.Context) (*types.Environments, *utilsGoServer.Error) {
 	return c.store.GetEnvironments()
 }
 
-func (c *ControllerMiddleware) CreateEnvironment(name string) (*types.Environment, *utilsGoServer.Error) {
+func (c *ControllerMiddleware) CreateEnvironment(ctx context.Context, name string) (*types.Environment, *utilsGoServer.Error) {
 	newId := types.GenerateID()
 	return newEnvironment(c.store, newId, name)
 }
 
-func (c *ControllerMiddleware) UpdateEnvironment(id, name string) (*types.Environment, *utilsGoServer.Error) {
+func (c *ControllerMiddleware) UpdateEnvironment(ctx context.Context, id, name string) (*types.Environment, *utilsGoServer.Error) {
 	env := &types.Environment{
 		Id:   id,
 		Name: name,
@@ -44,11 +45,12 @@ func (c *ControllerMiddleware) UpdateEnvironment(id, name string) (*types.Enviro
 	return env, nil
 }
 
-func (c *ControllerMiddleware) DeleteEnvironment(id string) *utilsGoServer.Error {
+func (c *ControllerMiddleware) DeleteEnvironment(ctx context.Context, id string) *utilsGoServer.Error {
 	return c.store.DeleteEnvironment(id)
 }
 
 func newEnvironment(store store.StoreInterface, id string, name string) (*types.Environment, *utilsGoServer.Error) {
+
 	env := &types.Environment{
 		Id:   id,
 		Name: name,

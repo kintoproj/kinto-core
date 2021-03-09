@@ -18,6 +18,6 @@ func (c *ControllerMiddleware) StartTeleport(
 	return c.store.StartChiselService(ctx, envId, blockNameToTeleport)
 }
 
-func (c *ControllerMiddleware) StopTeleport(envId, blockNameTeleported string) *utilsGoServer.Error {
+func (c *ControllerMiddleware) StopTeleport(ctx context.Context, envId, blockNameTeleported string) *utilsGoServer.Error {
 	return c.store.StopChiselService(envId, blockNameTeleported)
 }
