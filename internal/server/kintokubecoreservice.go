@@ -3,30 +3,26 @@ package server
 import (
 	"context"
 	"fmt"
-	"net"
-	"time"
-
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/kintohub/utils-go/klog"
 	utilsGoServer "github.com/kintohub/utils-go/server"
 	utilsGoGrpc "github.com/kintohub/utils-go/server/grpc"
 	"github.com/kintoproj/kinto-core/internal/config"
-	"github.com/kintoproj/kinto-core/internal/controller"
+	"github.com/kintoproj/kinto-core/internal/middleware"
 	"github.com/kintoproj/kinto-core/pkg/types"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
+	"net"
+	"time"
 )
 
 type KintoCoreService struct {
-	controller controller.ControllerInterface
+	middleware middleware.Interface
 }
 
-func NewKintoCoreService(
-	controller controller.ControllerInterface,
-) *KintoCoreService {
-
+func NewKintoCoreService(middleware middleware.Interface) *KintoCoreService {
 	return &KintoCoreService{
-		controller: controller,
+		middleware: middleware,
 	}
 }
 
@@ -40,7 +36,7 @@ func (k *KintoCoreService) GetEnvironment(
 		return nil, err
 	}
 
-	env, err := k.controller.GetEnvironment(req.Id)
+	env, err := k.middleware.GetEnvironment(req.Id)
 
 	if err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)
@@ -52,7 +48,7 @@ func (k *KintoCoreService) GetEnvironment(
 func (k *KintoCoreService) GetEnvironments(
 	c context.Context, empty *empty.Empty) (*types.Environments, error) {
 
-	env, err := k.controller.GetEnvironments()
+	env, err := k.middleware.GetEnvironments()
 
 	if err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)
@@ -66,7 +62,7 @@ func (k *KintoCoreService) CreateEnvironment(
 	if err := utilsGoGrpc.ValidateGrpcRequest(req); err != nil {
 		return nil, err
 	}
-	env, err := k.controller.CreateEnvironment(req.Name)
+	env, err := k.middleware.CreateEnvironment(req.Name)
 
 	if err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)
@@ -81,7 +77,7 @@ func (k *KintoCoreService) UpdateEnvironment(
 		return nil, err
 	}
 
-	env, err := k.controller.UpdateEnvironment(req.Id, req.Name)
+	env, err := k.middleware.UpdateEnvironment(req.Id, req.Name)
 
 	if err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)
@@ -96,7 +92,7 @@ func (k *KintoCoreService) DeleteEnvironment(
 		return nil, err
 	}
 
-	err := k.controller.DeleteEnvironment(req.Id)
+	err := k.middleware.DeleteEnvironment(req.Id)
 
 	if err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)
@@ -111,7 +107,7 @@ func (k *KintoCoreService) CreateBlock(
 		return nil, err
 	}
 
-	blockName, releaseId, err := k.controller.CreateBlock(
+	blockName, releaseId, err := k.middleware.CreateBlock(
 		req.EnvId,
 		req.Name,
 		req.BuildConfig,
@@ -134,7 +130,7 @@ func (k *KintoCoreService) DeployBlockUpdate(
 		return nil, err
 	}
 
-	blockName, releaseId, err := k.controller.DeployBlockUpdate(
+	blockName, releaseId, err := k.middleware.DeployBlockUpdate(
 		req.Name,
 		req.EnvId,
 		req.BaseReleaseId,
@@ -158,7 +154,7 @@ func (k *KintoCoreService) TriggerDeploy(
 		return nil, err
 	}
 
-	blockName, releaseId, err := k.controller.TriggerDeploy(
+	blockName, releaseId, err := k.middleware.TriggerDeploy(
 		req.Name,
 		req.EnvId)
 
@@ -178,7 +174,7 @@ func (k *KintoCoreService) RollbackBlock(
 		return nil, err
 	}
 
-	blockName, releaseId, err := k.controller.RollbackBlock(req.Name, req.EnvId, req.ReleaseId)
+	blockName, releaseId, err := k.middleware.RollbackBlock(req.Name, req.EnvId, req.ReleaseId)
 
 	if err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)
@@ -195,7 +191,7 @@ func (k *KintoCoreService) GetBlocks(c context.Context, req *types.BlockQueryReq
 		return nil, err
 	}
 
-	blocks, err := k.controller.GetBlocks(req.EnvId)
+	blocks, err := k.middleware.GetBlocks(req.EnvId)
 
 	if err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)
@@ -209,7 +205,7 @@ func (k *KintoCoreService) GetBlock(c context.Context, req *types.BlockQueryRequ
 		return nil, err
 	}
 
-	block, err := k.controller.GetBlock(req.Name, req.EnvId)
+	block, err := k.middleware.GetBlock(req.Name, req.EnvId)
 
 	if err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)
@@ -223,7 +219,7 @@ func (k *KintoCoreService) DeleteBlock(c context.Context, req *types.DeleteBlock
 		return nil, err
 	}
 
-	err := k.controller.DeleteBlock(req.Name, req.EnvId)
+	err := k.middleware.DeleteBlock(req.Name, req.EnvId)
 
 	if err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)
@@ -239,7 +235,7 @@ func (k *KintoCoreService) SuspendBlock(
 		return nil, err
 	}
 
-	blockName, releaseID, err := k.controller.SuspendBlock(req.Name, req.EnvId)
+	blockName, releaseID, err := k.middleware.SuspendBlock(req.Name, req.EnvId)
 
 	if err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)
@@ -260,7 +256,7 @@ func (k *KintoCoreService) WatchBuildLogs(
 	// Closed by store/kube/logs.go
 	logsChan := make(chan *types.Logs, 1)
 
-	err := k.controller.WatchBuildLogs(req.ReleaseId, req.BlockName, req.EnvId, stream.Context(), logsChan)
+	err := k.middleware.WatchBuildLogs(req.ReleaseId, req.BlockName, req.EnvId, stream.Context(), logsChan)
 	if err != nil {
 		return utilsGoGrpc.ConvertToGrpcError(stream.Context(), err)
 	}
@@ -284,7 +280,7 @@ func (k *KintoCoreService) WatchConsoleLogs(
 	req *types.WatchConsoleLogsRequest, stream types.KintoCoreService_WatchConsoleLogsServer) error {
 	logsChan := make(chan *types.ConsoleLog)
 
-	err := k.controller.WatchConsoleLogs(req.BlockName, req.EnvId, stream.Context(), logsChan)
+	err := k.middleware.WatchConsoleLogs(req.BlockName, req.EnvId, stream.Context(), logsChan)
 
 	if err != nil {
 		return utilsGoGrpc.ConvertToGrpcError(stream.Context(), err)
@@ -312,7 +308,7 @@ func (k *KintoCoreService) UpdateBuildStatus(
 		return nil, err
 	}
 
-	release, err := k.controller.UpdateBuildStatus(req.ReleaseId, req.BlockName, req.EnvId, req.Status.State)
+	release, err := k.middleware.UpdateBuildStatus(req.ReleaseId, req.BlockName, req.EnvId, req.Status.State)
 
 	if err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)
@@ -329,7 +325,7 @@ func (k *KintoCoreService) UpdateBuildCommitSha(c context.Context, req *types.Up
 		return nil, err
 	}
 
-	err := k.controller.UpdateBuildCommitSha(req.ReleaseId, req.BlockName, req.EnvId, req.CommitSha)
+	err := k.middleware.UpdateBuildCommitSha(req.ReleaseId, req.BlockName, req.EnvId, req.CommitSha)
 	if err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)
 	}
@@ -350,7 +346,7 @@ func (k *KintoCoreService) WatchBlocksHealthStatuses(
 			return nil
 		}
 
-		response, err := k.controller.GetBlocksHealthStatus(req.Id)
+		response, err := k.middleware.GetBlocksHealthStatus(req.Id)
 
 		if err != nil {
 			return utilsGoGrpc.ConvertToGrpcError(stream.Context(), err)
@@ -374,7 +370,7 @@ func (k *KintoCoreService) WatchJobsStatus(
 		return err
 	}
 
-	err := k.controller.WatchJobsStatus(
+	err := k.middleware.WatchJobsStatus(
 		req.Name, req.EnvId,
 		stream.Context(),
 		func(jobStatus *types.JobStatus) error {
@@ -402,7 +398,7 @@ func (k *KintoCoreService) WatchBlocksMetrics(
 			return nil
 		}
 
-		response, err := k.controller.GetBlocksMetrics(req.Name, req.EnvId)
+		response, err := k.middleware.GetBlocksMetrics(req.Name, req.EnvId)
 
 		if err != nil {
 			return utilsGoGrpc.ConvertToGrpcError(stream.Context(), err)
@@ -429,7 +425,7 @@ func (k *KintoCoreService) WatchReleasesStatus(
 	// this channel will be close in the below function internal/store/*/release/WatchReleasesStatus
 	statusChan := make(chan *types.ReleasesStatus)
 
-	err := k.controller.WatchReleasesStatus(req.Name, req.EnvId, stream.Context(), statusChan)
+	err := k.middleware.WatchReleasesStatus(req.Name, req.EnvId, stream.Context(), statusChan)
 
 	if err != nil {
 		close(statusChan)
@@ -454,7 +450,7 @@ func (k *KintoCoreService) WatchReleasesStatus(
 func (k *KintoCoreService) GetKintoConfiguration(
 	c context.Context, empty *empty.Empty) (*types.KintoConfiguration, error) {
 
-	return k.controller.GetKintoConfiguration()
+	return k.middleware.GetKintoConfiguration()
 }
 
 func (k *KintoCoreService) KillBlockInstance(
@@ -463,7 +459,7 @@ func (k *KintoCoreService) KillBlockInstance(
 		return nil, err
 	}
 
-	err := k.controller.KillBlockInstance(req.Id, req.EnvId)
+	err := k.middleware.KillBlockInstance(req.Id, req.EnvId)
 
 	if err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)
@@ -477,7 +473,7 @@ func (k *KintoCoreService) AbortRelease(c context.Context, req *types.AbortBlock
 		return nil, err
 	}
 
-	err := k.controller.AbortRelease(c, req.BlockName, req.ReleaseId, req.EnvId)
+	err := k.middleware.AbortRelease(c, req.BlockName, req.ReleaseId, req.EnvId)
 
 	if err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)
@@ -491,7 +487,7 @@ func (k *KintoCoreService) TagRelease(c context.Context, req *types.TagReleaseRe
 		return nil, err
 	}
 
-	err := k.controller.TagRelease(req.Tag, req.BlockName, req.EnvId, req.ReleaseId)
+	err := k.middleware.TagRelease(req.Tag, req.BlockName, req.EnvId, req.ReleaseId)
 	if err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)
 	}
@@ -503,7 +499,7 @@ func (k *KintoCoreService) PromoteRelease(c context.Context, req *types.PromoteR
 	if err := utilsGoGrpc.ValidateGrpcRequest(req); err != nil {
 		return nil, err
 	}
-	err := k.controller.PromoteRelease(req.Tag, req.ReleaseId, req.BlockName, req.EnvId, req.TargetEnvId)
+	err := k.middleware.PromoteRelease(req.Tag, req.ReleaseId, req.BlockName, req.EnvId, req.TargetEnvId)
 	if err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)
 	}
@@ -515,7 +511,7 @@ func (k *KintoCoreService) CreateCustomDomainName(c context.Context, req *types.
 		return nil, err
 	}
 
-	if err := k.controller.CreateCustomDomainName(req.BlockName, req.EnvId, req.CustomDomainName, req.Protocol); err != nil {
+	if err := k.middleware.CreateCustomDomainName(req.BlockName, req.EnvId, req.CustomDomainName, req.Protocol); err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)
 	}
 
@@ -527,7 +523,7 @@ func (k *KintoCoreService) DeleteCustomDomainName(c context.Context, req *types.
 		return nil, err
 	}
 
-	if err := k.controller.DeleteCustomDomainName(req.BlockName, req.EnvId, req.CustomDomainName, req.Protocol); err != nil {
+	if err := k.middleware.DeleteCustomDomainName(req.BlockName, req.EnvId, req.CustomDomainName, req.Protocol); err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)
 	}
 
@@ -549,7 +545,7 @@ func (k *KintoCoreService) CheckCustomDomainName(c context.Context, req *types.C
 		IsCNAMEOK:          fmt.Sprintf("%s.", req.CNAME) == cname,
 		CNAMEWanted:        req.CNAME,
 		CNAMEFound:         cname,
-		IsCertificateReady: k.controller.CheckCertificateReadiness(req.BlockName, req.EnvId),
+		IsCertificateReady: k.middleware.CheckCertificateReadiness(req.BlockName, req.EnvId),
 	}, nil
 }
 
@@ -558,7 +554,7 @@ func (k *KintoCoreService) EnablePublicURL(c context.Context, req *types.EnableP
 		return nil, err
 	}
 
-	if err := k.controller.EnableExternalURL(req.BlockName, req.EnvId, req.ReleaseId); err != nil {
+	if err := k.middleware.EnableExternalURL(req.BlockName, req.EnvId, req.ReleaseId); err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)
 	}
 
@@ -570,7 +566,7 @@ func (k *KintoCoreService) DisablePublicURL(c context.Context, req *types.Disabl
 		return nil, err
 	}
 
-	if err := k.controller.DisableExternalURL(req.BlockName, req.EnvId); err != nil {
+	if err := k.middleware.DisableExternalURL(req.BlockName, req.EnvId); err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)
 	}
 
@@ -582,7 +578,7 @@ func (k *KintoCoreService) StartTeleport(req *types.TeleportRequest, stream type
 		return err
 	}
 
-	data, uErr := k.controller.StartTeleport(stream.Context(), req.EnvId, req.BlockName)
+	data, uErr := k.middleware.StartTeleport(stream.Context(), req.EnvId, req.BlockName)
 
 	if uErr != nil {
 		return utilsGoGrpc.ConvertToGrpcError(stream.Context(), uErr)
@@ -601,7 +597,7 @@ func (k *KintoCoreService) StartTeleport(req *types.TeleportRequest, stream type
 		if stream.Context().Err() != nil {
 			log.Ctx(stream.Context()).Debug().Msgf("client has closed teleport cli connection")
 
-			err := k.controller.StopTeleport(req.EnvId, req.BlockName)
+			err := k.middleware.StopTeleport(req.EnvId, req.BlockName)
 
 			if err != nil {
 				return utilsGoGrpc.ConvertToGrpcError(stream.Context(), err)
@@ -619,7 +615,7 @@ func (k *KintoCoreService) GenReleaseConfigFromKintoFile(
 		return nil, err
 	}
 
-	releaseConfig, err := k.controller.GenReleaseConfigFromKintoFile(
+	releaseConfig, err := k.middleware.GenReleaseConfigFromKintoFile(
 		req.Org, req.Repo, req.Branch, req.EnvId, req.GithubUserToken, req.BlockType)
 	if err != nil {
 		return nil, utilsGoGrpc.ConvertToGrpcError(c, err)

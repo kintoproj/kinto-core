@@ -7,7 +7,7 @@ import (
 	"github.com/kintoproj/kinto-core/pkg/types"
 )
 
-func (c *Controller) WatchBuildLogs(releaseId, blockName, envId string, ctx context.Context,
+func (c *ControllerMiddleware) WatchBuildLogs(releaseId, blockName, envId string, ctx context.Context,
 	logsChan chan *types.Logs) *utilsGoServer.Error {
 	block, err := c.store.GetBlock(blockName, envId)
 
@@ -37,7 +37,7 @@ func (c *Controller) WatchBuildLogs(releaseId, blockName, envId string, ctx cont
 	return nil
 }
 
-func (c *Controller) WatchConsoleLogs(blockName, envId string, context context.Context,
+func (c *ControllerMiddleware) WatchConsoleLogs(blockName, envId string, context context.Context,
 	logsChan chan *types.ConsoleLog) *utilsGoServer.Error {
 	return c.store.WatchConsoleLogs(blockName, envId, context, logsChan)
 }

@@ -18,7 +18,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (c *Controller) UpdateBuildStatus(releaseId, blockName, envId string,
+func (c *ControllerMiddleware) UpdateBuildStatus(releaseId, blockName, envId string,
 	buildState types.BuildStatus_State) (*types.Release, *utilsGoServer.Error) {
 
 	block, err := c.store.GetBlock(blockName, envId)
@@ -74,7 +74,7 @@ func (c *Controller) UpdateBuildStatus(releaseId, blockName, envId string,
 	return release, nil
 }
 
-func (c *Controller) UpdateBuildCommitSha(releaseId, blockName, envId, commitSha string) *utilsGoServer.Error {
+func (c *ControllerMiddleware) UpdateBuildCommitSha(releaseId, blockName, envId, commitSha string) *utilsGoServer.Error {
 	block, err := c.store.GetBlock(blockName, envId)
 	if err != nil {
 		return utilsGoServer.NewErrorf(utilsGoServer.StatusCode_NotFound,
@@ -97,12 +97,12 @@ func (c *Controller) UpdateBuildCommitSha(releaseId, blockName, envId, commitSha
 	return nil
 }
 
-func (c *Controller) WatchReleasesStatus(blockName, envId string, ctx context.Context,
+func (c *ControllerMiddleware) WatchReleasesStatus(blockName, envId string, ctx context.Context,
 	logsChan chan *types.ReleasesStatus) *utilsGoServer.Error {
 	return c.store.WatchBlockReleaseStatus(blockName, envId, ctx, logsChan)
 }
 
-func (c *Controller) AbortRelease(ctx context.Context, blockName, releaseId, envId string) *utilsGoServer.Error {
+func (c *ControllerMiddleware) AbortRelease(ctx context.Context, blockName, releaseId, envId string) *utilsGoServer.Error {
 	// Need to consider refak GetRelease and have release reference its parent block
 	// This code is duplicated everywhere...
 	block, err := c.store.GetBlock(blockName, envId)
@@ -143,7 +143,7 @@ func (c *Controller) AbortRelease(ctx context.Context, blockName, releaseId, env
 	return c.store.UpsertBlock(block)
 }
 
-func (c *Controller) TagRelease(tag, blockName, envId, releaseId string) *utilsGoServer.Error {
+func (c *ControllerMiddleware) TagRelease(tag, blockName, envId, releaseId string) *utilsGoServer.Error {
 	block, err := c.store.GetBlock(blockName, envId)
 	if err != nil {
 		return err
@@ -161,7 +161,7 @@ func (c *Controller) TagRelease(tag, blockName, envId, releaseId string) *utilsG
 	return c.store.UpsertBlock(block)
 }
 
-func (c *Controller) PromoteRelease(tag, releaseId, blockName, envId, targetEnvId string) *utilsGoServer.Error {
+func (c *ControllerMiddleware) PromoteRelease(tag, releaseId, blockName, envId, targetEnvId string) *utilsGoServer.Error {
 	block, err := c.store.GetBlock(blockName, envId)
 	if err != nil {
 		return err

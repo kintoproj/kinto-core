@@ -8,7 +8,7 @@ import (
 	"github.com/kintoproj/kinto-core/pkg/types"
 )
 
-func (c *Controller) GetEnvironment(id string) (*types.Environment, *utilsGoServer.Error) {
+func (c *ControllerMiddleware) GetEnvironment(id string) (*types.Environment, *utilsGoServer.Error) {
 	env, err := c.store.GetEnvironment(id)
 
 	if err != nil {
@@ -23,16 +23,16 @@ func (c *Controller) GetEnvironment(id string) (*types.Environment, *utilsGoServ
 	return env, err
 }
 
-func (c *Controller) GetEnvironments() (*types.Environments, *utilsGoServer.Error) {
+func (c *ControllerMiddleware) GetEnvironments() (*types.Environments, *utilsGoServer.Error) {
 	return c.store.GetEnvironments()
 }
 
-func (c *Controller) CreateEnvironment(name string) (*types.Environment, *utilsGoServer.Error) {
+func (c *ControllerMiddleware) CreateEnvironment(name string) (*types.Environment, *utilsGoServer.Error) {
 	newId := types.GenerateID()
 	return newEnvironment(c.store, newId, name)
 }
 
-func (c *Controller) UpdateEnvironment(id, name string) (*types.Environment, *utilsGoServer.Error) {
+func (c *ControllerMiddleware) UpdateEnvironment(id, name string) (*types.Environment, *utilsGoServer.Error) {
 	env := &types.Environment{
 		Id:   id,
 		Name: name,
@@ -44,7 +44,7 @@ func (c *Controller) UpdateEnvironment(id, name string) (*types.Environment, *ut
 	return env, nil
 }
 
-func (c *Controller) DeleteEnvironment(id string) *utilsGoServer.Error {
+func (c *ControllerMiddleware) DeleteEnvironment(id string) *utilsGoServer.Error {
 	return c.store.DeleteEnvironment(id)
 }
 

@@ -6,7 +6,7 @@ import (
 	"github.com/kintoproj/kinto-core/pkg/types"
 )
 
-func (c *Controller) WatchJobsStatus(
+func (c *ControllerMiddleware) WatchJobsStatus(
 	blockName, envId string,
 	ctx context.Context,
 	sendClientLogs func(jobStatus *types.JobStatus) error) *utilsGoServer.Error {

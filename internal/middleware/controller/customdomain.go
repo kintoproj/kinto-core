@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (c *Controller) CreateCustomDomainName(
+func (c *ControllerMiddleware) CreateCustomDomainName(
 	blockName, envId, domainName string, protocol types.RunConfig_Protocol) *utilsGoServer.Error {
 
 	domainNameAlreadyExists, err := c.store.DoesCustomDomainExistInStore(domainName)
@@ -78,7 +78,7 @@ func isDomainNameAlreadyCreated(domainName string, domainNames []string) bool {
 	return false
 }
 
-func (c *Controller) DeleteCustomDomainName(
+func (c *ControllerMiddleware) DeleteCustomDomainName(
 	blockName, envId, domainName string, protocol types.RunConfig_Protocol) *utilsGoServer.Error {
 
 	block, err := c.store.GetBlock(blockName, envId)
@@ -133,7 +133,7 @@ func removeDomainFromArray(domainName string, domainNames []string) []string {
 	return domainNames[:len(domainNames)-1]
 }
 
-func (c *Controller) CheckCertificateReadiness(blockName, envId string) bool {
+func (c *ControllerMiddleware) CheckCertificateReadiness(blockName, envId string) bool {
 	isCertReady, uErr := c.store.CheckCertificateReadiness(blockName, envId)
 
 	if uErr != nil {

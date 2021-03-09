@@ -6,6 +6,6 @@ import (
 	"github.com/kintoproj/kinto-core/pkg/types"
 )
 
-func (c *Controller) GetBlocksMetrics(name, envId string) (*types.BlocksMetrics, *utilsGoServer.Error) {
+func (c *ControllerMiddleware) GetBlocksMetrics(name, envId string) (*types.BlocksMetrics, *utilsGoServer.Error) {
 	return c.store.GetBlocksMetrics(name, envId)
 }
